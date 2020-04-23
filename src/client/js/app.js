@@ -5,7 +5,7 @@ let date = new Date().getTime();
 //et newDate = date.getMonth() + '.' + date.getDate() + '.' + date.getFullYear();
 
 // Event listener to use the callback function whenever the generate button has been clicked on
-document.getElementById('generate').addEventListener('click', () => {
+document.getElementById('generate').addEventListener('click', async () => {
   // Declares the variables from both input values from the user
 
   const arrivalDate = new Date(
@@ -27,77 +27,61 @@ document.getElementById('generate').addEventListener('click', () => {
 
   // Executes retrieveData with the global variables and the zip code as parameters
   //retrieveData(baseURL, zipCode, apiKey)
-  dateChecker(arrivalDate, returnDate)
-    .then(
-      () => dataFilter()
-      /* Uses the data retrieved as JSON before executing postData function to
-       * send data to server side with a POST route and retrieve the data as an array.
-       */
-    )
-    .then((data) =>
-      postData('/getWeather', {
-        location: data.location,
-        arr_date: arrivalDate,
-        ret_date: returnDate,
-        countdown: countDays,
-        trip_days: tripDays
-      })
-    )
-
+  try {
+    await dateChecker(arrivalDate, returnDate);
+    const data = await dataFilter();
+    /* Uses the data retrieved as JSON before executing postData function to
+     * send data to server side with a POST route and retrieve the data as an array.
+     */
+    const post = await postData('/getWeather', {
+      location: data.location,
+      arr_date: arrivalDate,
+      ret_date: returnDate,
+      countdown: countDays,
+      trip_days: tripDays
+    });
     // Retrieves the array through a GET route before updating the HTML of the website with the retrieved results
-    .then((data) => getResults())
-    .catch((err) => logError(err));
+    const res = await getResults();
+  } catch (err) {
+    logError(err);
+    return;
+  }
 });
 
 const dateChecker = async (arrival, departure) => {
   const returnDate = departure ? departure : null;
 
-  try {
-    console.log(`${date} < ${arrival}`);
-    if (!isNaN(arrival)) {
-      if (date < arrival) {
-        throw new Error('The date of your arrival must be later than today');
-      } else {
-        if (isNaN(returnDate) && arrival > returnDate) {
-          throw new Error(
-            'The date of your departure must be later than your arrival date'
-          );
-        } else {
-          console.log(arrival);
-          return;
-        }
-      }
-    } else {
-      throw new Error('Please enter the date of your arrival');
-    }
-  } catch (error) {
-    Promise.reject(error);
-    logError(error);
-  }
+  console.log(`${date} < ${arrival}`);
+  if (isNaN(arrival)) throw new Error('Please enter the date of your arrival');
+  if (date > arrival)
+    throw new Error('The date of your arrival must be later than today');
+  if (!isNaN(returnDate) && arrival < returnDate)
+    throw new Error(
+      'The date of your departure must be later than your arrival date'
+    );
+
+  console.log(arrival);
+  return;
 };
 
 const dataFilter = async () => {
   let localEntry = await document.getElementById('location').value;
-  console.log;
+  console.log('@dataFilter');
   const zipRegex = RegExp('d{5}([ -]d{4})?');
   const pcRegex = RegExp(
     'GIR[ ]?0AA|((AB|AL|B|BA|BB|BD|BH|BL|BN|BR|BS|BT|CA|CB|CF|CH|CM|CO|CR|CT|CV|CW|DA|DD|DE|DG|DH|DL|DN|DT|DY|E|EC|EH|EN|EX|FK|FY|G|GL|GY|GU|HA|HD|HG|HP|HR|HS|HU|HX|IG|IM|IP|IV|JE|KA|KT|KW|KY|L|LA|LD|LE|LL|LN|LS|LU|M|ME|MK|ML|N|NE|NG|NN|NP|NR|NW|OL|OX|PA|PE|PH|PL|PO|PR|RG|RH|RM|S|SA|SE|SG|SK|SL|SM|SN|SO|SP|SR|SS|ST|SW|SY|TA|TD|TF|TN|TQ|TR|TS|TW|UB|W|WA|WC|WD|WF|WN|WR|WS|WV|YO|ZE)(d[dA-Z]?[ ]?d[ABD-HJLN-UW-Z]{2}))|BFPO[ ]?d{1,4}'
   );
-  const minChar = RegExp('.{4,}');
   let data = {};
-  try {
-    if (localEntry != null) {
-      if (zipRegex.test(localEntry) || pcRegex.test(localEntry)) {
-        data = { location: localEntry };
-      } else if (!minChar.test(localEntry)) {
-        throw 'Please enter four characters or more.';
-      }
-    } else {
-      throw "Please enter the Zip/Post Code or the name of the location you're traveling to.";
-    }
-  } catch (err) {
-    logError(err);
-  }
+
+  if (localEntry === null)
+    throw new Error(
+      "Please enter the Zip/Post Code or the name of the location you're traveling to."
+    );
+  if (localEntry.length < 4)
+    throw new Error('Please enter four characters or more.');
+  if (!zipRegex.test(localEntry) || !pcRegex.test(localEntry))
+    throw new Error('Please enter the.');
+  data = { location: localEntry };
   console.log('point 1 ' + data);
   return data;
 };
