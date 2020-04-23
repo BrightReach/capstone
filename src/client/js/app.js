@@ -1,22 +1,18 @@
 // Global Variables
-const baseURL = 'http://api.openweathermap.org/data/2.5/weather?';
-const apiKey = 'c643e032021c529e4a2a3f97488e7d36';
 
 // Create a new date instance dynamically with JS
-let d = new Date();
-let newDate = d.getMonth() + '.' + d.getDate() + '.' + d.getFullYear();
-let arrival_Date = document.getElementById('arrival-date').value;
-let return_Date = document.getElementById('return-date').value;
+let date = new Date();
+let newDate = date.getMonth() + '.' + date.getDate() + '.' + date.getFullYear();
 
 // Event listener to use the callback function whenever the generate button has been clicked on
 document.getElementById('generate').addEventListener('click', () => {
   // Declares the variables from both input values from the user
 
-  const arrivalDate = new Date(arrival_Date);
-  const returnDate = new Date(return_Date);
+  const arrivalDate = new Date(document.getElementById('arrival-date').value);
+  const returnDate = new Date(document.getElementById('return-date').value);
   console.log(`${arrivalDate} ${returnDate}`);
 
-  let countDays = Math.floor((arrivalDate - d) / (1000 * 3600 * 24));
+  let countDays = Math.floor((arrivalDate - date) / (1000 * 3600 * 24));
   let tripDays = 0;
   if (returnDate != null) {
     const timeDifference = returnDate - arrivalDate;
@@ -27,7 +23,7 @@ document.getElementById('generate').addEventListener('click', () => {
 
   // Executes retrieveData with the global variables and the zip code as parameters
   //retrieveData(baseURL, zipCode, apiKey)
-  dateChecker()
+  dateChecker(arrivalDate, returnDate)
     .then(
       dataFilter()
       /* Uses the data retrieved as JSON before executing postData function to
@@ -48,17 +44,23 @@ document.getElementById('generate').addEventListener('click', () => {
     .then((data) => getResults());
 });
 
-const dateChecker = async () => {
+const dateChecker = async (arrival, departure) => {
+  const returnDate = departure ? departure : null;
+
   try {
-    console.log(`${d} < ${arrivalDate}`);
-    if (d < arrivalDate) {
-      throw 'The date of your arrival must be later than today';
-    } else {
-      if (arrivalDate > returnDate && returnDate != null) {
-        throw 'The date of your departure must be later than your arrival date';
+    console.log(`${date} < ${arrival}`);
+    if (arrival != 'Invalid Date') {
+      if (date < arrival) {
+        throw 'The date of your arrival must be later than today';
       } else {
-        return;
+        if (returnDate != null && arrival > returnDate) {
+          throw 'The date of your departure must be later than your arrival date';
+        } else {
+          return;
+        }
       }
+    } else {
+      throw 'Please enter the date of your arrival';
     }
   } catch (error) {
     logError(error);
@@ -67,6 +69,7 @@ const dateChecker = async () => {
 
 const dataFilter = async () => {
   const localEntry = await document.getElementById('location').value;
+  console.log;
   const zipRegex = RegExp('d{5}([ -]d{4})?');
   const pcRegex = RegExp(
     'GIR[ ]?0AA|((AB|AL|B|BA|BB|BD|BH|BL|BN|BR|BS|BT|CA|CB|CF|CH|CM|CO|CR|CT|CV|CW|DA|DD|DE|DG|DH|DL|DN|DT|DY|E|EC|EH|EN|EX|FK|FY|G|GL|GY|GU|HA|HD|HG|HP|HR|HS|HU|HX|IG|IM|IP|IV|JE|KA|KT|KW|KY|L|LA|LD|LE|LL|LN|LS|LU|M|ME|MK|ML|N|NE|NG|NN|NP|NR|NW|OL|OX|PA|PE|PH|PL|PO|PR|RG|RH|RM|S|SA|SE|SG|SK|SL|SM|SN|SO|SP|SR|SS|ST|SW|SY|TA|TD|TF|TN|TQ|TR|TS|TW|UB|W|WA|WC|WD|WF|WN|WR|WS|WV|YO|ZE)(d[dA-Z]?[ ]?d[ABD-HJLN-UW-Z]{2}))|BFPO[ ]?d{1,4}'
@@ -74,15 +77,13 @@ const dataFilter = async () => {
   const minChar = RegExp('.{4,}');
   let data = {};
   try {
-    if (
-      zipRegex.test(localEntry) ||
-      pcRegex.test(localEntry) ||
-      localEntry != null
-    ) {
-      data = { location: localEntry };
-    } else if (!minChar.test(localEntry)) {
-      throw 'Please enter four characters or more.';
-    } else if (localEntry === null) {
+    if (localEntry != null) {
+      if (zipRegex.test(localEntry) || pcRegex.test(localEntry)) {
+        data = { location: localEntry };
+      } else if (!minChar.test(localEntry)) {
+        throw 'Please enter four characters or more.';
+      }
+    } else {
       throw "Please enter the Zip/Post Code or the name of the location you're traveling to.";
     }
   } catch (err) {
