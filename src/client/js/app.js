@@ -1,20 +1,24 @@
 // Global Variables
 
 // Create a new date instance dynamically with JS
-let date = new Date();
-let newDate = date.getMonth() + '.' + date.getDate() + '.' + date.getFullYear();
+let date = new Date().getTime();
+//et newDate = date.getMonth() + '.' + date.getDate() + '.' + date.getFullYear();
 
 // Event listener to use the callback function whenever the generate button has been clicked on
 document.getElementById('generate').addEventListener('click', () => {
   // Declares the variables from both input values from the user
 
-  const arrivalDate = new Date(document.getElementById('arrival-date').value);
-  const returnDate = new Date(document.getElementById('return-date').value);
+  const arrivalDate = new Date(
+    document.getElementById('arrival-date').value
+  ).getTime();
+  const returnDate = new Date(
+    document.getElementById('return-date').value
+  ).getTime();
   console.log(`${arrivalDate} ${returnDate}`);
 
   let countDays = Math.floor((arrivalDate - date) / (1000 * 3600 * 24));
   let tripDays = 0;
-  if (returnDate != null) {
+  if (returnDate != NaN) {
     const timeDifference = returnDate - arrivalDate;
     tripDays = Math.floor(timeDifference / (1000 * 3600 * 24));
   } else {
@@ -25,7 +29,7 @@ document.getElementById('generate').addEventListener('click', () => {
   //retrieveData(baseURL, zipCode, apiKey)
   dateChecker(arrivalDate, returnDate)
     .then(
-      dataFilter()
+      () => dataFilter()
       /* Uses the data retrieved as JSON before executing postData function to
        * send data to server side with a POST route and retrieve the data as an array.
        */
@@ -41,7 +45,8 @@ document.getElementById('generate').addEventListener('click', () => {
     )
 
     // Retrieves the array through a GET route before updating the HTML of the website with the retrieved results
-    .then((data) => getResults());
+    .then((data) => getResults())
+    .catch((err) => logError(err));
 });
 
 const dateChecker = async (arrival, departure) => {
@@ -49,26 +54,30 @@ const dateChecker = async (arrival, departure) => {
 
   try {
     console.log(`${date} < ${arrival}`);
-    if (arrival != 'Invalid Date') {
+    if (!isNaN(arrival)) {
       if (date < arrival) {
-        throw 'The date of your arrival must be later than today';
+        throw new Error('The date of your arrival must be later than today');
       } else {
-        if (returnDate != null && arrival > returnDate) {
-          throw 'The date of your departure must be later than your arrival date';
+        if (isNaN(returnDate) && arrival > returnDate) {
+          throw new Error(
+            'The date of your departure must be later than your arrival date'
+          );
         } else {
+          console.log(arrival);
           return;
         }
       }
     } else {
-      throw 'Please enter the date of your arrival';
+      throw new Error('Please enter the date of your arrival');
     }
   } catch (error) {
+    Promise.reject(error);
     logError(error);
   }
 };
 
 const dataFilter = async () => {
-  const localEntry = await document.getElementById('location').value;
+  let localEntry = await document.getElementById('location').value;
   console.log;
   const zipRegex = RegExp('d{5}([ -]d{4})?');
   const pcRegex = RegExp(
@@ -89,7 +98,7 @@ const dataFilter = async () => {
   } catch (err) {
     logError(err);
   }
-  console.log(data);
+  console.log('point 1 ' + data);
   return data;
 };
 
@@ -144,7 +153,9 @@ const getResults = async () => {
   }
 };
 
-const logError = (e) =>
-  (document.getElementById('content').innerHTML = `Error: ${e}`);
+const logError = (e) => {
+  document.getElementById('content').innerHTML = `Error: ${e}`;
+  console.log(e);
+};
 
 export { getResults, postData, dataFilter, logError, dateChecker };
