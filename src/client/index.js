@@ -1,5 +1,4 @@
 import {
-  getData,
   getResults,
   postData,
   dataFilter,
@@ -16,7 +15,6 @@ import {
 import './styles/main.scss';
 
 export {
-  getData,
   getResults,
   postData,
   dataFilter,

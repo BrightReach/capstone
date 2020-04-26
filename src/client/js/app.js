@@ -4,9 +4,7 @@
 let date = new Date().getTime();
 
 // Event listener to use the callback function whenever the generate button has been clicked on
-document.getElementById('generate').addEventListener('click', getData());
-
-const getData = async () => {
+document.getElementById('generate').addEventListener('click', async () => {
   // Declares the variables from both input values from the user
   document.getElementById('response').innerHTML = '';
   document.getElementById('response').style.display = 'none';
@@ -48,7 +46,7 @@ const getData = async () => {
     logError(err);
     return;
   }
-};
+});
 
 const dateChecker = async (arrival, departure) => {
   const returnDate = departure ? departure : null;
@@ -120,4 +118,4 @@ const logError = (e) => {
   console.error(e);
 };
 
-export { getData, getResults, postData, dataFilter, logError, dateChecker };
+export { getResults, postData, dataFilter, logError, dateChecker };

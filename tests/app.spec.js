@@ -1,25 +1,27 @@
-//import { dateChecker } from './../src/client/js/app';
-const app = require('./../src/client/js/app');
+const fs = require('fs');
+const path = require('path');
+const html = fs.readFileSync(
+  path.resolve(__dirname, '../src/client/views/index.html'),
+  'utf8'
+);
 
-document.body.innerHTML = `
-<input type="date" id="arrival-date" required>
-<input type="date" id="return-date">
-<input type="text" id="location" placeholder="For e.g. London England" required>
-<button id="generate" type="submit"> Generate </button>
-`;
+jest.dontMock('fs');
 
-let returnDate = new Date(document.getElementById('return-date').value);
-let arrivalDate = new Date(document.getElementById('arrival-date').value);
-
-beforeEach(() => {
-  arrivalDate.setMilliseconds(1590624000000);
-  returnDate.setMilliseconds(1591228800000);
-});
+/*let returnDate = new Date(document.getElementById('return-date').value);
+let arrivalDate = new Date(document.getElementById('arrival-date').value);*/
 
 describe('Date Checker', () => {
+  const { app } = require('../src/client/js/app');
+
+  beforeEach(() => {
+    arrivalDate.setMilliseconds(1590624000000);
+    returnDate.setMilliseconds(1591228800000);
+  });
+  afterEach(() => {
+    // restore the original func after test
+    jest.resetModules();
+  });
   test('It should pass the dateChecker function with the right date added', () => {
-    document.getElementById('generate').addEventListener('click', async () => {
-      expect(app.dateChecker(arrivalDate, returnDate)).resolves.anything();
-    });
+    expect(app.dateChecker(arrivalDate, returnDate)).resolves.anything();
   });
 });
