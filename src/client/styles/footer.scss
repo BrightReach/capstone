@@ -1,0 +1,25 @@
+#brightReach {
+  color: #323232;
+}
+#brightReach:hover {
+  animation: slidein 3s;
+}
+@keyframes slidein {
+  0% {
+    color: #323232;
+  }
+
+  35% {
+    color: #4278b3;
+  }
+
+  70% {
+    color: #323232;
+    background-color: #4278b300;
+  }
+
+  100% {
+    color: #371941;
+    background-color: #4278b3;
+  }
+}

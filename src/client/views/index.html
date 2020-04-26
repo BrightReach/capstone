@@ -9,39 +9,86 @@
   <script src="https://kit.fontawesome.com/213ffc1bde.js" crossorigin="anonymous"></script>
 </head>
 
-<body>
-  <div id="app">
-    <div class="holder headline">
-      Weather Journal App
-    </div>
-    <div class="holder date">
-      <label for="arrival-date">Enter your date of arrival</label>
-      <input type="date" id="arrival-date" required>
-    </div>
-    <div class="holder date">
-      <label for="return-date">Enter your date of return</label>
-      <input type="date" id="return-date">
-    </div>
-    <div class="holder zip">
-      <label for="location">Enter Zipcode here</label>
-      <input type="text" id="location" placeholder="enter zip code here" required>
-    </div>
-    <div class="holder feel">
-      <button id="generate" type="submit"> Generate </button>
-    </div>
-    <div class="holder entry">
-      <div class="title">Most Recent Entry</div>
-      <div id="entryHolder">
-        <div id="date"></div>
-        <div id="temp"></div>
-        <div id="content"></div>
+<body id="app">
+  <div>
+    <header id="header">
+      <div class="container headline">
+        <h1>Weather Journal App</h1>
       </div>
-      <div class="holder feel">
-        <button id="delete" type="submit"> remove </button>
+      <div class="">
+        navigation
       </div>
-    </div>
-  </div>
+    </header>
+    <main id="main">
+      <section id="form">
+        <div class="container date">
+          <label for="arrival-date">Enter your date of arrival</label>
+          <input type="date" id="arrival-date" required>
+        </div>
+        <div class="container date">
+          <label for="return-date">Enter your date of return</label>
+          <input type="date" id="return-date">
+        </div>
+        <div class="container zip">
+          <label for="location">Enter the location of your destination</label>
+          <input type="text" id="location" placeholder="For e.g. London England" required>
+        </div>
+        <div class="container submit">
+          <div id="response"></div>
+          <button id="generate" type="submit"> Generate </button>
+        </div>
+      </section>
+      <section class="container" id='entry'>
+        <div class="entry">
+          <h2 class="title">Most Recent Entry</h2>
+          <div class="container" id='entryHolder'>
+            <div id="tab">
+              <button class="tablinks" onclick="Client.openTab(event, 'London')">London</button>
+              <button class="tablinks" onclick="Client.openTab(event, 'Paris')">Paris</button>
+            </div>
+            <div id="London" class="tabContent">
+              <h3>London</h3>
+              <img src="https://via.placeholder.com/640x480">
+              <div class="card">
+                <h4>25/04/2020</h4>
+                <div class="weather">
+                  <img src="https://www.weatherbit.io/static/img/icons/t01d.png">
+                  <p>THNUDER!!</p>
+                </div>
+                <div id="temp">Temp: 28<span>&#8451;</span></div>
+              </div>
+              <div class="card">
+                <h4>25/04/2020</h4>
+                <div class="weather">
+                  <img src="https://www.weatherbit.io/static/img/icons/t01d.png">
+                  <p>THNUDER!!</p>
+                </div>
+                <div id="temp">Temp: 28<span>&#8451;</span></div>
+              </div>
 
+              <div class="container"> <button class="delete" type="submit"> Remove </button>
+              </div>
+            </div>
+            <div id="Paris" class="tabContent">
+              <h3>Paris</h3>
+              <p>Paris is the capital of France.</p>
+              <div class="card"></div>
+              <div id="date"></div>
+              <div id="temp"></div>
+              <div id="content"></div>
+              <button class="delete" type="submit"> remove </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </main>
+    <footer id="footer">
+      <p>Developed and designed by <a href="https://www.brightreachstudio.co.uk" id=brightReach>Bright Reach Studio</a>.
+      </p>
+    </footer>
+  </div>
 </body>
 
 </html>

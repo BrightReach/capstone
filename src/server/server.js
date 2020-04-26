@@ -1,6 +1,8 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
+const fetch = require('node-fetch');
+
 const Geonames = require('geonames.js');
 
 const geonames = new Geonames({
@@ -51,28 +53,33 @@ function getRandomInt(max) {
 }
 
 const getForecast = async (data = {}) => {
-  const forecastType = data.countdown <= 7 ? 'current' : 'daily';
+  const forecastType = data.countdown <= 7 ? 'current' : 'forecast/daily';
+
   const res = await fetch(
-    `https://api.weatherbit.io/v2.0/forecast/${forecastType}&lat=${data.lat}&lon=${data.long}&key=${process.env.WEATHERBIT_API_KEY}`
+    'https://api.weatherbit.io/v2.0/' +
+      forecastType +
+      '?lat=' +
+      data.lat +
+      '&lon=' +
+      data.long +
+      '&key=' +
+      process.env.WEATHERBIT_API_KEY
   );
   let newData = {};
 
-  try {
-    const weatherData = await res.json();
-    newData = {
-      weather: weatherData[0].weather,
-      countdown: newData.countdown,
-      trip_days: newData.trip_days,
-      city_name: weatherData[0].city_name,
-      wind_spd: weatherData[0].wind_spd,
-      wind_dir: weatherData[0].wind_dir,
-      temp: weatherData[0].temp,
-      app_temp: weatherData[0].app_temp,
-    };
-    return newData;
-  } catch (error) {
-    console.error(error.message);
-  }
+  const weatherData = await res.json();
+  const cityName =
+    forecastType === 'current'
+      ? weatherData.data[0].city_name
+      : weatherData.city_name;
+
+  newData = {
+    weather: weatherData.data,
+    countdown: data.countdown,
+    tripDays: data.tripDays,
+    cityName: cityName,
+  };
+  return newData;
 };
 
 // GET route to return the project data to the client side script
@@ -81,44 +88,50 @@ app.get('/all', (request, response) => {
   console.log(projectData);
 });
 
+app.post('/delete', (request, response) => {
+  const deleteIndex = projectData.splice(request.index, 1);
+  console.log(deleteIndex);
+  response.send({ body: 'Your entry has been deleted.' });
+});
+
 // POST route to push incoming data from client side as JSON data
-app.post('/getWeather', (request, response) => {
+app.post('/getWeather', async (request, response) => {
   let newData = request.body;
   let newEntry = {};
-  geonames
-    .search({ q: newEntry.location }) //get continents
-    .then((resp) => {
-      newEntry = {
-        location: newData.location,
-        arr_date: newData.arr_date,
-        ret_date: newData.ret_date,
-        countdown: newData.countdown,
-        trip_days: newData.trip_days,
-        lat: resp.geonames[0].lat,
-        long: resp.geonames[0].lng,
-      };
-      getForecast(newEntry);
-      console.log(resp.geonames[0]);
-    })
-    .then(async (data) => {
-      const pixabay_res = await fetch(
-        `https://pixabay.com/api/?key=${process.env.PIXABAY_API_KEY}&q=${data.city_name}&image_type=photo&pretty=true`
-      );
-      const pixabay = await pixabay_res.json();
-      const pixabayIndex = getRandomInt(pixabay.length);
-      newEntry = {
-        weather: weatherData[0].weather,
-        countdown: newData.countdown,
-        trip_days: newData.trip_days,
-        city_name: weatherData[0].city_name,
-        wind_spd: weatherData[0].wind_spd,
-        wind_dir: weatherData[0].wind_dir,
-        temp: weatherData[0].temp,
-        app_temp: weatherData[0].app_temp,
-        picture: pixabay[pixabayIndex].webformatURL,
-      };
-      projectData.push(newEntry);
-      response.send(projectData);
-    })
-    .catch((err) => console.error(err));
+  try {
+    const local = await geonames.search({ q: newData.location });
+    newEntry = await {
+      location: local.toponymName,
+      arrival: newData.arrival,
+      return: newData.return,
+      countdown: newData.countdown,
+      tripDays: newData.tripDays,
+      lat: local.geonames[0].lat,
+      long: local.geonames[0].lng,
+    };
+    const weather = await getForecast(newEntry);
+
+    const pixabayRes = await fetch(
+      `https://pixabay.com/api/?key=${process.env.PIXABAY_API_KEY}&q=${weather.cityName}&image_type=photo&pretty=true`
+    );
+    const pixabay = await pixabayRes.json();
+    const pixabayPic =
+      pixabay.total === 0
+        ? null
+        : pixabay.hits[getRandomInt(pixabay.hits.length)].webformatURL;
+    newEntry = {
+      weather: weather.weather,
+      countdown: newData.countdown,
+      tripDays: newData.tripDays,
+      cityName: weather.cityName,
+      picture: pixabayPic,
+    };
+    projectData.push(newEntry);
+    response.send(projectData);
+  } catch (err) {
+    console.error(err);
+    response.render('response', { error: err });
+  }
 });
+
+module.exports = app;
