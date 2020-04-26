@@ -3,8 +3,10 @@
 // Create a new date instance dynamically with JS
 let date = new Date().getTime();
 
+const generateBtn = document.getElementById('generate');
+
 // Event listener to use the callback function whenever the generate button has been clicked on
-document.getElementById('generate').addEventListener('click', async () => {
+generateBtn.onclick(async () => {
   // Declares the variables from both input values from the user
   document.getElementById('response').innerHTML = '';
   document.getElementById('response').style.display = 'none';
