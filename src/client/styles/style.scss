@@ -28,19 +28,10 @@
   padding: 1.5em;
 }
 
-#response {
-  padding: 35px;
-  border: 3px solid red;
-  color: red;
-  margin: 20px;
-  display: none;
-}
-
 .title {
   padding: 1em;
 }
 
-/*  Basic Styling To Override Default For Basic HTML Elements */
 label {
   display: block;
   font-size: 27px;
@@ -79,12 +70,6 @@ img {
   height: auto;
   margin: 20px auto;
 }
-/*@media (min-width: 600px) {
-  img {
-    max-width: 50%;
-    height: auto;
-  }
-}*/
 
 textarea {
   background: #22b2da;

@@ -1,10 +1,12 @@
+// Setup for dotenv to use .env file
 const dotenv = require('dotenv');
 dotenv.config();
 
+// Setup to use fetch within node.js
 const fetch = require('node-fetch');
 
+// Setup and start up an instance of the Geonames API
 const Geonames = require('geonames.js');
-
 const geonames = new Geonames({
   username: process.env.GEONOME_USERNAME,
   lan: 'en',
@@ -46,13 +48,15 @@ const listening = () => {
 // Setup Server
 const server = app.listen(port, listening);
 
+// Generates a random integer based on the parameter
 function getRandomInt(max) {
   const min = 0;
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
+  return Math.floor(Math.random() * (max - min)) + min;
 }
 
 const getForecast = async (data = {}) => {
+  // Returns the forecast type for the url based on the countdown before arriving at the user's destination
   const forecastType = data.countdown <= 7 ? 'current' : 'forecast/daily';
 
   const res = await fetch(
@@ -66,8 +70,9 @@ const getForecast = async (data = {}) => {
       process.env.WEATHERBIT_API_KEY
   );
   let newData = {};
-
   const weatherData = await res.json();
+
+  // Retrieves the location's name based on the type of forecast API used.
   const cityName =
     forecastType === 'current'
       ? weatherData.data[0].city_name
@@ -88,6 +93,7 @@ app.get('/all', (request, response) => {
   console.log(projectData);
 });
 
+// POST route to delete an index from the client side's command.
 app.post('/delete', (request, response) => {
   const deleteIndex = projectData.splice(request.index, 1);
   console.log(deleteIndex);

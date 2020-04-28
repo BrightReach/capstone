@@ -26,6 +26,13 @@ textarea:focus,
 button:focus {
   outline: none;
 }
+
+#response {
+  padding: 35px;
+  margin: 20px;
+  display: none;
+}
+
 /* Style for Placeholder Text*/
 ::placeholder {
   /* Firefox, Chrome, Opera */

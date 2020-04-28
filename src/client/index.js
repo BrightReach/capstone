@@ -1,8 +1,9 @@
 import {
+  getData,
   getResults,
   postData,
   dataFilter,
-  logError,
+  logResponse,
   dateChecker
 } from './js/app';
 import {
@@ -15,10 +16,11 @@ import {
 import './styles/main.scss';
 
 export {
+  getData,
   getResults,
   postData,
   dataFilter,
-  logError,
+  logResponse,
   dateChecker,
   openTab,
   createUI,

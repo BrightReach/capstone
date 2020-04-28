@@ -1,51 +1,73 @@
-const app = require('../src/client/js/app');
+/**
+ * @jest-environment jsdom
+ */
 
-/*const fs = require('fs');
-const path = require('path');
-const html = fs.readFileSync(
-  path.resolve(__dirname, '../src/client/views/index.html'),
-  'utf8'
-);
+describe('Date Checker', () => {
+  const app = require('../src/client/js/app');
 
-jest.dontMock('fs');*/
-
-/*let returnDate = new Date(document.getElementById('return-date').value);
-let arrivalDate = new Date(document.getElementById('arrival-date').value);*/
-
-/*describe('Date Checker', () => {
   const html = document.createElement('div');
   html.innerHTML = `<input type="date" id="arrival-date" required>
-<input type="date" id="return-date">
-<input type="text" id="location" placeholder="For e.g. London England" required>
-<button id="generate" type="submit"> Generate </button>
+  <input type="date" id="return-date">
+  <button id="generate" type="submit"> Generate </button>
 `;
   document.body.appendChild(html);
 
+  let arrival = new Date();
+  let depart = new Date();
+
   beforeEach(() => {
-    arrivalDate.setMilliseconds(1590624000000);
-    returnDate.setMilliseconds(1591228800000);
-  });
-  afterEach(() => {
-    // restore the original func after test
     jest.resetModules();
+    jest.clearAllMocks();
   });
-  test('It should pass the dateChecker function with the right date added', () => {
-    expect(app.dateChecker(arrivalDate, returnDate)).resolves.anything();
+
+  test('It should pass the dateChecker function with the right date added', async (done) => {
+    arrival.setFullYear(2020, 4, 27);
+    await expect(
+      app.dateChecker(arrival.getTime(), null, new Date())
+    ).resolves.toBeUndefined();
+    done();
+  });
+  test('It should fail the dateChecker function if the arrival date has passed today', async (done) => {
+    arrival.setFullYear(2020, 0, 1);
+    await expect(
+      app.dateChecker(arrival.getTime(), null, new Date())
+    ).rejects.toThrow();
+    done();
+  });
+  test('It should pass the dateChecker function with the right date added', async (done) => {
+    arrival.setFullYear(2020, 4, 27);
+    depart.setFullYear(2019, 4, 27);
+    await expect(
+      app.dateChecker(arrival.getTime(), depart.getTime(), new Date())
+    ).rejects.toThrow();
+    done();
   });
 });
-*/
 
 describe('Data Filter', () => {
+  const app = require('../src/client/js/app');
+
   const html = document.createElement('div');
-  html.innerHTML = `<input type="date" id="arrival-date" required>
-<input type="date" id="return-date">
-<input type="text" id="location" placeholder="For e.g. London England" required>
-<button id="generate" type="submit"> Generate </button>`;
+  html.innerHTML = `<input type="text" id="location" placeholder="For e.g. London England" required>
+  <button id="generate" type="submit"> Generate </button>`;
   document.body.appendChild(html);
-  const generateBtn = document.getElementById('generate');
-  generateBtn.simulate('click');
-  test('It should fail the test if the location is null', (done) => {
-    //document.getElementById('location').value
+
+  beforeEach(() => {
+    jest.resetModules();
+    jest.clearAllMocks();
+  });
+
+  test('It should fail the test if the location is null', () => {
     expect(app.dataFilter()).rejects.toThrow();
+  });
+  test('It should pass the test if the location has been added', () => {
+    let value = '';
+    document.getElementById = jest.fn((id) => {
+      if (id === 'location') value = 'London';
+      return {
+        value,
+      };
+    });
+    expect(app.dataFilter()).resolves.toBe({ location: value });
   });
 });
